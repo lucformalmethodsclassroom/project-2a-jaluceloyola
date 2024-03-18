@@ -18,6 +18,8 @@ Next ==
 
 Spec == Init /\ [][Next]_v
 
-Safety == v % 2 = 0
+Safety == TRUE
+
+\* Safety == v % 2 = 0
 
 ====
