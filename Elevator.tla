@@ -6,56 +6,23 @@ CONSTANTS
 
 VARIABLES 
     running,
+    cabinDoor,
     currentFloor,
     requestQueue,
-    queueSize,
-    cabinDoor,
-    floor1Door,
-    floor2Door,
-    floor3Door,
-    floor4Door,
-    timeRemaining
+    timePassed
      
-    \*opTime,                 \* operation time
+vars == <<running, currentFloor, requestQueue, cabinDoor, timePassed>>
 
-vars == <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+TypeOK == cabinDoor \in { CLOSED, OPEN } /\ running \in { OFF, ON } /\ timePassed \in Nat
 
-TypeOK == cabinDoor \in { CLOSED, OPEN } /\ running \in { OFF, ON } /\ timeRemaining \in Nat
-
-\*MaxTime == 10
-MaxQueue == 10
-
+MaxTime == 20
 
 Init ==
     /\ running = OFF
     /\ currentFloor = 1
     /\ requestQueue = << >>
-    /\ queueSize = 0 
     /\ cabinDoor = CLOSED
-    /\ floor1Door = CLOSED
-    /\ floor2Door = CLOSED
-    /\ floor3Door = CLOSED
-    /\ floor4Door = CLOSED
-    /\ timeRemaining = 10
-
-\* increment remaining time by one second
-(*
-IncTime ==
-    \*/\ running = OFF
-    /\ timeRemaining' = timeRemaining + 1
-    /\ timeRemaining' <= MaxTime
-    /\  <<running, currentFloor, requestQueue, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door >>
-
-Start ==
-    /\ timeRemaining > 0
-    /\ running' = ON
-    /\ UNCHANGED << door, running, currentFloor >>
-
-Cancel ==
-    /\ running' = OFF
-    /\ timeRemaining' = 0
-    /\ UNCHANGED << door, currentFloor >>
-*)
+    /\ timePassed = 0
 
 Test(x) == x # currentFloor
 CheckFloorInQueue(floornum,queue) ==
@@ -75,43 +42,37 @@ CheckFloorInQueue(floornum,queue) ==
     ELSE TRUE
         
 Tick ==
-    \*/\ running = ON
-    /\ timeRemaining' = timeRemaining - 1
-    /\ timeRemaining' >= 0
-    \*/\ IF timeRemaining' = 0 THEN running' = OFF ELSE UNCHANGED << running >>
-    /\ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door >>
+    /\ timePassed' = timePassed + 1
+    /\ timePassed' <= MaxTime
+    /\ UNCHANGED <<running, currentFloor, requestQueue, cabinDoor>>
 
 floor1Request ==
     /\ ~CheckFloorInQueue(1,requestQueue)
     /\ requestQueue' = Append(requestQueue,1)
-    /\ queueSize' = queueSize + 1 
-    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
 floor2Request ==
     /\ ~CheckFloorInQueue(2,requestQueue)
     /\ requestQueue' = Append(requestQueue,2)
-    /\ queueSize' = queueSize + 1 
-    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
 floor3Request ==
     /\ ~CheckFloorInQueue(3,requestQueue)
     /\ requestQueue' = Append(requestQueue,3)
-    /\ queueSize' = queueSize + 1 
-    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
 floor4Request ==
     /\ ~CheckFloorInQueue(4,requestQueue)
     /\ requestQueue' = Append(requestQueue,4)
-    /\ queueSize' = queueSize + 1 
-    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
 checkQueue ==
     IF CheckFloorInQueue(currentFloor,requestQueue) THEN
         /\ requestQueue' = SelectSeq(requestQueue,Test)
         /\ cabinDoor' = OPEN
         /\ running' = OFF
-        /\ UNCHANGED <<currentFloor, queueSize, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-    ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+        /\ UNCHANGED <<currentFloor, timePassed >>
+    ELSE UNCHANGED <<running, currentFloor, requestQueue, cabinDoor, timePassed>>
 
 moveUp ==
     /\ requestQueue # << >>
@@ -120,7 +81,7 @@ moveUp ==
     /\ currentFloor' = currentFloor + 1
     /\ cabinDoor' = CLOSED
     /\ running' = ON
-    /\ UNCHANGED << requestQueue, queueSize, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    /\ UNCHANGED << requestQueue, timePassed>>
 
 moveDown ==
     /\ requestQueue # << >>
@@ -129,94 +90,36 @@ moveDown ==
     /\ currentFloor' = currentFloor - 1
     /\ cabinDoor' = CLOSED
     /\ running' = ON
-    /\ UNCHANGED << requestQueue, queueSize, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    /\ UNCHANGED << requestQueue, timePassed>>
 
-\*TickProgress == TRUE
-
-TickProgress == WF_timeRemaining(Tick)
+TickProgress == WF_timePassed(Tick)
 
 Next ==
+    \/ Tick
     \/ floor1Request
     \/ floor2Request
     \/ floor3Request
     \/ floor4Request
+    \/ checkQueue
     \/ moveUp 
     \/ moveDown 
-    \/ checkQueue
-    \/ Tick
 
 Spec == Init /\ [][Next]_vars /\ TickProgress
 
+
+TimeInvariant == TRUE
+\* Use with -simulate
+\*TimeInvariant == timePassed < MaxTime
+
 \*DoorSafety == TRUE
-\*DoorSafety == queueSize < MaxQueue
-
-DoorSafety == timeRemaining > 0
-
-\* DoorSafety == door = OPEN => running = OFF
-\* DoorSafety == running = ON => door = CLOSED
+DoorSafety == cabinDoor = OPEN => running = OFF
+RunSafety == running = ON => cabinDoor = CLOSED
 
 LivenessConditions == TRUE
-
-\* HeatLiveness == running = ON ~> running = OFF
+\*LivenessConditions == running = ON ~> running = OFF
 
 RunsUntilDoneOrInterrupted == TRUE
-
 \* RunsUntilDoneOrInterrupted == 
-\*     [][running = ON => running' = ON \/ timeRemaining' = 0 \/ door' = OPEN]_vars
+\*     [][running = ON => running' = ON \/ timePassed' = 0 \/ door' = OPEN]_vars
 
 ====
-
-(*OpenDoor ==
-    /\ cabinDoor' = OPEN
-    /\ UNCHANGED <<running, currentFloor, requestQueue, queueSize, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-
-CloseDoor ==
-    /\ cabinDoor' = CLOSED
-    /\ UNCHANGED <<running, currentFloor, requestQueue, queueSize, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-*)
-
-
-(*
-moveDown ==
-    IF requestQueue # << >> THEN
-        IF Head(requestQueue) > currentFloor THEN 
-        \/  /\ currentFloor' = currentFloor + 1     \*move up 1
-            /\ currentFloor' < MAXFLOOR    \* until reach max
-            /\ UNCHANGED <<running, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-        \/  /\ currentFloor >= MAXFLOOR  
-            /\ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-        ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-    ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-*)
-(*
-moveDown ==
-    IF requestQueue # << >> THEN
-        IF Head(requestQueue) < currentFloor THEN 
-        \/  /\ currentFloor' = currentFloor - 1     \*move up 1
-            /\ currentFloor' > MINFLOOR    \* until reach max
-            /\ UNCHANGED <<running, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-        \/  /\ currentFloor <= MINFLOOR  
-            /\ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-        ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-    ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-
-moveDown ==
-    IF requestQueue # << >> THEN
-        IF Head(requestQueue) < currentFloor THEN 
-        \/  /\ currentFloor' = currentFloor - 1     \*move up 1
-            /\ currentFloor' > MINFLOOR    \* until reach max
-            /\ UNCHANGED <<running, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-        \/  /\ currentFloor <= MINFLOOR  
-            /\ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-        ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-    ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-
-*)
-(*
-checkQueue ==
-    IF requestQueue # << >> THEN
-        /\ requestQueue' = SelectSeq(requestQueue,Test)
-        /\ timeRemaining' = 10
-        /\ UNCHANGED <<running, currentFloor, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door >>    
-    ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
-*)
