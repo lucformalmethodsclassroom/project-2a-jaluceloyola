@@ -10,21 +10,11 @@ VARIABLES
     currentFloor,
     requestQueue,
     timePassed
-     
+
 vars == <<running, currentFloor, requestQueue, cabinDoor, timePassed>>
-
-TypeOK == cabinDoor \in { CLOSED, OPEN } /\ running \in { OFF, ON } /\ timePassed \in Nat
-
 MaxTime == 20
 
-Init ==
-    /\ running = OFF
-    /\ currentFloor = 1
-    /\ requestQueue = << >>
-    /\ cabinDoor = CLOSED
-    /\ timePassed = 0
-
-Test(x) == x # currentFloor
+\* Function used to test if a given floor is in the requestQueue
 CheckFloorInQueue(floornum,queue) ==
     IF Len(queue) = 0 THEN FALSE
         ELSE IF Len(queue) = 1
@@ -40,12 +30,25 @@ CheckFloorInQueue(floornum,queue) ==
             /\ queue[3] # floornum
         THEN FALSE
     ELSE TRUE
-        
+
+\*used with SelectSeq to clear the current floor from the queue
+Test(x) == x # currentFloor
+
+Init ==
+    /\ running = OFF
+    /\ cabinDoor = CLOSED
+    /\ currentFloor = 1
+    /\ requestQueue = << >>
+    /\ timePassed = 0
+
+\*Increment passing of time        
 Tick ==
     /\ timePassed' = timePassed + 1
     /\ timePassed' <= MaxTime
     /\ UNCHANGED <<running, currentFloor, requestQueue, cabinDoor>>
 
+\*All 4 Floor Requests all check to see if requested floor is in the Queue, 
+\* and if not, adds it to the end of the queue 
 floor1Request ==
     /\ ~CheckFloorInQueue(1,requestQueue)
     /\ requestQueue' = Append(requestQueue,1)
@@ -66,6 +69,8 @@ floor4Request ==
     /\ requestQueue' = Append(requestQueue,4)
     /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
+\*checkQueue checks if currentFloor exists in request Queue. if TRUE, then stop running, open the doors to let passengers out,
+\* and remove the current floor from the queue. If False, then UNCHANGED
 checkQueue ==
     IF CheckFloorInQueue(currentFloor,requestQueue) THEN
         /\ requestQueue' = SelectSeq(requestQueue,Test)
@@ -74,6 +79,9 @@ checkQueue ==
         /\ UNCHANGED <<currentFloor, timePassed >>
     ELSE UNCHANGED <<running, currentFloor, requestQueue, cabinDoor, timePassed>>
 
+\* moveUp will check to see if there is a request in the queue and if so, if the oldest request is above
+\* the current floor. If so, it then closes the elevator door and moves up, checking first to see if the 
+\* elevator isn't already at the top floor
 moveUp ==
     /\ requestQueue # << >>
     /\ Head(requestQueue) > currentFloor 
@@ -83,6 +91,7 @@ moveUp ==
     /\ running' = ON
     /\ UNCHANGED << requestQueue, timePassed>>
 
+\* same as moveUp, but in the other direction
 moveDown ==
     /\ requestQueue # << >>
     /\ Head(requestQueue) < currentFloor 
@@ -91,8 +100,6 @@ moveDown ==
     /\ cabinDoor' = CLOSED
     /\ running' = ON
     /\ UNCHANGED << requestQueue, timePassed>>
-
-TickProgress == WF_timePassed(Tick)
 
 Next ==
     \/ Tick
@@ -104,8 +111,12 @@ Next ==
     \/ moveUp 
     \/ moveDown 
 
+\* Ensures Tick is called with weak fairness
+TickProgress == WF_timePassed(Tick)
+
 Spec == Init /\ [][Next]_vars /\ TickProgress
 
+TypeOK == running \in { OFF, ON } /\ cabinDoor \in { CLOSED, OPEN } /\ currentFloor \in {1,2,3,4} /\ timePassed \in Nat
 
 TimeInvariant == TRUE
 \* Use with -simulate
@@ -115,11 +126,15 @@ TimeInvariant == TRUE
 DoorSafety == cabinDoor = OPEN => running = OFF
 RunSafety == running = ON => cabinDoor = CLOSED
 
+EventualService == TRUE
+TimelyService == TRUE
+
+\*RunsUntilDoneOrInterrupted == TRUE
+RunsUntilDoneOrInterrupted == 
+    [][running = ON => running' = ON \/ timePassed' = MaxTime \/ cabinDoor' = OPEN]_vars
+
 LivenessConditions == TRUE
 \*LivenessConditions == running = ON ~> running = OFF
 
-RunsUntilDoneOrInterrupted == TRUE
-\* RunsUntilDoneOrInterrupted == 
-\*     [][running = ON => running' = ON \/ timePassed' = 0 \/ door' = OPEN]_vars
 
 ====
