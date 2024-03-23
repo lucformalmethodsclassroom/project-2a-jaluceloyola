@@ -60,7 +60,22 @@ Cancel ==
 *)
 
 Test(x) == x # currentFloor
-
+CheckFloorInQueue(floornum,queue) ==
+    IF Len(queue) = 0 THEN FALSE
+        ELSE IF Len(queue) = 1
+            /\ queue[1] # floornum
+        THEN FALSE 
+        ELSE IF Len(queue) = 2
+            /\ queue[1] # floornum
+            /\ queue[2] # floornum
+        THEN FALSE 
+        ELSE IF Len(queue) = 3
+            /\ queue[1] # floornum
+            /\ queue[2] # floornum
+            /\ queue[3] # floornum
+        THEN FALSE
+    ELSE TRUE
+        
 Tick ==
     \*/\ running = ON
     /\ timeRemaining' = timeRemaining - 1
@@ -102,6 +117,31 @@ floor1Request == \* add floor to Q FIFO
     ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
 *)
 
+floor1Request ==
+    /\ ~CheckFloorInQueue(1,requestQueue)
+    /\ requestQueue' = Append(requestQueue,1)
+    /\ queueSize' = queueSize + 1 
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+
+floor2Request ==
+    /\ ~CheckFloorInQueue(2,requestQueue)
+    /\ requestQueue' = Append(requestQueue,2)
+    /\ queueSize' = queueSize + 1 
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+
+floor3Request ==
+    /\ ~CheckFloorInQueue(3,requestQueue)
+    /\ requestQueue' = Append(requestQueue,3)
+    /\ queueSize' = queueSize + 1 
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+
+floor4Request ==
+    /\ ~CheckFloorInQueue(4,requestQueue)
+    /\ requestQueue' = Append(requestQueue,4)
+    /\ queueSize' = queueSize + 1 
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+
+(*
 floor1Request == \* add floor to Q FIFO
     \/  Len(requestQueue) = 0
         /\ requestQueue' = Append(requestQueue,1)
@@ -189,7 +229,7 @@ floor4Request == \* add floor to Q FIFO
         /\ queueSize' = queueSize + 1 
         /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
     \/ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
-
+*)
 (*
 floor2Request == \* add floor to Q FIFO
     /\ requestQueue' = Append(requestQueue,2)
