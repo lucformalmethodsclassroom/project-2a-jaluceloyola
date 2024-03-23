@@ -15,6 +15,7 @@ VARIABLES
     floor3Door,
     floor4Door,
     timeRemaining
+     
     \*opTime,                 \* operation time
 
 vars == <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
@@ -24,6 +25,8 @@ TypeOK == cabinDoor \in { CLOSED, OPEN } /\ running \in { OFF, ON } /\ timeRemai
 \*MaxTime == 10
 
 MaxQueue == 10
+
+
 
 Init ==
     /\ running = OFF
@@ -35,7 +38,7 @@ Init ==
     /\ floor2Door = CLOSED
     /\ floor3Door = CLOSED
     /\ floor4Door = CLOSED
-    /\ timeRemaining = 5
+    /\ timeRemaining = 10
 
 \* increment remaining time by one second
 (*
@@ -55,6 +58,9 @@ Cancel ==
     /\ timeRemaining' = 0
     /\ UNCHANGED << door, currentFloor >>
 *)
+
+Test(x) == x # currentFloor
+
 Tick ==
     \*/\ running = ON
     /\ timeRemaining' = timeRemaining - 1
@@ -69,11 +75,122 @@ CloseDoor ==
     /\ cabinDoor' = CLOSED
     /\ UNCHANGED <<running, currentFloor, requestQueue, queueSize, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
 
+(*
 floor1Request == \* add floor to Q FIFO
-    /\ requestQueue' = Append(requestQueue,1)
-    /\ queueSize' = queueSize + 1 
-    /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    IF Len(requestQueue) = 0 THEN 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    ELSE IF Len(requestQueue) = 1 THEN 
+        IF requestQueue[1] # 1 THEN 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+        ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    ELSE IF Len(requestQueue) = 2 THEN 
+        IF requestQueue[1] # 1 /\ requestQueue[2] # 1 THEN 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+        ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    ELSE IF Len(requestQueue) = 3 THEN 
+        IF requestQueue[1] # 1  /\ requestQueue[2] # 1 /\ requestQueue[3] # 1 THEN 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+        ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+    ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+*)
 
+floor1Request == \* add floor to Q FIFO
+    \/  Len(requestQueue) = 0
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 1 
+        /\ requestQueue[1] # 1 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 2 
+        /\ requestQueue[1] # 1 /\ requestQueue[2] # 1 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+    \/ Len(requestQueue) = 3 
+        /\ requestQueue[1] # 1  /\ requestQueue[2] # 1 /\ requestQueue[3] # 1 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+
+floor2Request == \* add floor to Q FIFO
+    \/  Len(requestQueue) = 0
+        /\ requestQueue' = Append(requestQueue,2)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 1 
+        /\ requestQueue[1] # 2
+        /\ requestQueue' = Append(requestQueue,2)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 2 
+        /\ requestQueue[1] # 2 /\ requestQueue[2] # 2 
+        /\ requestQueue' = Append(requestQueue,1)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+    \/ Len(requestQueue) = 3 
+        /\ requestQueue[1] # 2  /\ requestQueue[2] # 2 /\ requestQueue[3] # 2 
+        /\ requestQueue' = Append(requestQueue,2)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+
+floor3Request == \* add floor to Q FIFO
+    \/  Len(requestQueue) = 0
+        /\ requestQueue' = Append(requestQueue,3)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 1 
+        /\ requestQueue[1] # 3
+        /\ requestQueue' = Append(requestQueue,3)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 2 
+        /\ requestQueue[1] # 3 /\ requestQueue[2] # 3 
+        /\ requestQueue' = Append(requestQueue,3)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+    \/ Len(requestQueue) = 3 
+        /\ requestQueue[1] # 3  /\ requestQueue[2] # 3 /\ requestQueue[3] # 2
+        /\ requestQueue' = Append(requestQueue,3)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+
+floor4Request == \* add floor to Q FIFO
+    \/  Len(requestQueue) = 0
+        /\ requestQueue' = Append(requestQueue,4)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 1 
+        /\ requestQueue[1] # 4
+        /\ requestQueue' = Append(requestQueue,4)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ Len(requestQueue) = 2 
+        /\ requestQueue[1] # 4 /\ requestQueue[2] # 4 
+        /\ requestQueue' = Append(requestQueue,4)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+    \/ Len(requestQueue) = 3 
+        /\ requestQueue[1] # 4  /\ requestQueue[2] # 4 /\ requestQueue[3] # 4
+        /\ requestQueue' = Append(requestQueue,4)
+        /\ queueSize' = queueSize + 1 
+        /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+    \/ UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining>>
+
+(*
 floor2Request == \* add floor to Q FIFO
     /\ requestQueue' = Append(requestQueue,2)
     /\ queueSize' = queueSize + 1 
@@ -86,8 +203,9 @@ floor3Request == \* add floor to Q FIFO
 
 floor4Request == \* add floor to Q FIFO
     /\ requestQueue' = Append(requestQueue,4)
-    /\ queueSize' = queueSize + 1 
+    /\ queueSize' = queueSize + 1
     /\ UNCHANGED <<running, currentFloor, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+*)
 
 moveUp ==
     IF requestQueue # << >> THEN
@@ -120,9 +238,17 @@ checkQueue ==
         ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
     ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
 
-TickProgress == TRUE
+(*
+checkQueue ==
+    IF requestQueue # << >> THEN
+        /\ requestQueue' = SelectSeq(requestQueue,Test)
+        /\ timeRemaining' = 10
+        /\ UNCHANGED <<running, currentFloor, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door >>    
+    ELSE UNCHANGED <<running, currentFloor, requestQueue, queueSize, cabinDoor, floor1Door, floor2Door, floor3Door, floor4Door, timeRemaining >>
+*)
+\*TickProgress == TRUE
 
-\* TickProgress == WF_timeRemaining(Tick)
+TickProgress == WF_timeRemaining(Tick)
 
 Next ==
     \*\/ IncTime
@@ -134,19 +260,19 @@ Next ==
     \/ floor2Request
     \/ floor3Request
     \/ floor4Request
-    \/ moveUp /\ Tick
-    \/ moveDown /\ Tick
+    \/ moveUp 
+    \/ moveDown 
     \/ checkQueue
-    \*\/ Tick
+    \/ Tick
 
 Spec == Init /\ [][Next]_vars /\ TickProgress
 
 \*DoorSafety == TRUE
 \*DoorSafety == queueSize < MaxQueue
-DoorSafety == timeRemaining > 0 \/ queueSize < MaxQueue
+
+DoorSafety == timeRemaining > 0
 
 \* DoorSafety == door = OPEN => running = OFF
-
 \* DoorSafety == running = ON => door = CLOSED
 
 LivenessConditions == TRUE
