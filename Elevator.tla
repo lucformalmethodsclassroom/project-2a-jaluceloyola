@@ -127,8 +127,8 @@ TypeOK == running \in { OFF, ON } /\ cabinDoor \in { CLOSED, OPEN } /\ currentFl
 DoorSafety == cabinDoor = OPEN => running = OFF
 RunSafety == running = ON => cabinDoor = CLOSED
 
-EventualService == <>(requestQueue = <<>>) 
-TimelyService == timePassed = 1 ~> timePassed = 0
+EventualService == <>(requestQueue = <<>>) \* Eventually all floors get serviced
+TimelyService == timePassed = 1 ~> timePassed = 0 \* Eventually the oldest request in the queue gets serviced
 
 RunsUntilDoneOrInterrupted == 
     [][running = ON => running' = ON \/ cabinDoor' = OPEN]_vars
