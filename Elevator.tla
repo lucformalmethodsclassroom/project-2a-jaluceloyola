@@ -12,7 +12,6 @@ VARIABLES
     timePassed
 
 vars == <<running, currentFloor, requestQueue, cabinDoor, timePassed>>
-MaxTime == 5
 
 \* Function used to test if a given floor is in the requestQueue
 CheckFloorInQueue(floornum,queue) ==
@@ -44,7 +43,6 @@ Init ==
 \*Increment passing of time as elevator moves between floors   
 Tick ==
     /\ timePassed' = timePassed + 1
-    /\ timePassed' <= MaxTime
     /\ UNCHANGED <<running, currentFloor, requestQueue, cabinDoor>>
 
 \*All 4 Floor Requests all check to see if requested floor is in the Queue, 
@@ -108,7 +106,7 @@ moveDown ==
     /\ running' = ON
     /\ UNCHANGED << requestQueue, timePassed>>
 
-    Next ==
+Next ==
     \/ floor1Request
     \/ floor2Request
     \/ floor3Request
