@@ -9,7 +9,7 @@ This code models the floor-request queue for a single elevator, subject to the f
 - When the elevator cabin visits a floor, users can get on and/or off the elevator, and pending requests for that floor are cleared.  
 - Each floor has one door for safely entering/exiting the elevator, which opens simultaneously with a corresponding door on the elevator cabin.  
 
-This code uses a sequence to named 'requestQueue' collect all floor requests for the elevator. There is no distinction made between requests made from inside the elevator or requests made from individual floors with respect to the priorty of the request in the queue.  
+This code uses a sequence to named 'requestQueue' to collect all floor requests for the elevator. There is no distinction made between requests made from inside the elevator or requests made from individual floors with respect to the priorty of the request in the queue.  
 
 The variable 'timePassed' is used to track how long the oldest request has been at the front of the queue.  
 
