@@ -13,7 +13,7 @@ This code uses a sequence to named 'requestQueue' to collect all floor requests 
 
 The variable 'timePassed' is used to track how long the oldest request has been at the front of the queue.  
 
-The actions 'Floor1Request', 'Floor2Request', etc... simply check to see if the current floor request is already in the queue, and if not adds the request to the end of the queue, ensuring older requests will have a higher priorty for being served. 
+The actions 'Floor1Request', 'Floor2Request', etc... simply check to see if the current floor request is already in the queue (or is a restricted floor), and if not adds the request to the end of the queue, ensuring older requests will have a higher priorty for being served. 
    
 The action 'checkQueue' checks to see if the current floor is in the queue, and if so, stops the elevator and opens the doors to allow passengers to enter/exit ,and removes the current floor from 'requestQueue'. If the current floor is also the same as the request at the head of 'requestQueue', then timePassed is set to 0.  
 
