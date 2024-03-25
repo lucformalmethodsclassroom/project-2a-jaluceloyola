@@ -49,21 +49,25 @@ Tick ==
 \* and if not, adds it to the end of the queue 
 floor1Request ==
     /\ ~CheckFloorInQueue(1,requestQueue)
+    /\ {x \in RESTRICTED_FLOORS : x # 1} = {}
     /\ requestQueue' = Append(requestQueue,1)
     /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
 floor2Request ==
     /\ ~CheckFloorInQueue(2,requestQueue)
+    /\ {x \in RESTRICTED_FLOORS : x # 2} = {}
     /\ requestQueue' = Append(requestQueue,2)
     /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
 floor3Request ==
     /\ ~CheckFloorInQueue(3,requestQueue)
+    /\ {x \in RESTRICTED_FLOORS : x # 3} = {}
     /\ requestQueue' = Append(requestQueue,3)
     /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
 floor4Request ==
     /\ ~CheckFloorInQueue(4,requestQueue)
+    /\ {x \in RESTRICTED_FLOORS : x # 4} = {}
     /\ requestQueue' = Append(requestQueue,4)
     /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
