@@ -20,17 +20,20 @@ The actions 'Floor1Request', 'Floor2Request', etc... simply check to see if the 
    
 The action 'checkQueue' checks to see if the current floor is in the queue, and if so stops the elevator and opens the doors to allow passengers to enter/exit ,and removes the current floor from 'requestQueue'. If the current floor is also the same as the request at the head of 'requestQueue', then timePassed is set to 0.  
 
-The opening of the 'outer' elevator doors on each floor are not explicitly modeled. It is implicently assumed that these outer doors can only open when the elevator cabin is on their respective floor, i.e. the door on each floor is functionally part of the 'door' of the elevator when the cabin shares a floor with them, and that it is not mechanically possible to open these 'floor doors' when the elevator cabin is on another floor (not quite sure how to model someone taking a crowbar and forcing them open).  
+The opening of the 'outer' elevator doors on each floor are not explicitly modeled. It is assumed that these outer doors can only open when the elevator cabin is on their respective floor, i.e. the outer door on each floor is functionally part of the 'door' of the elevator when the cabin shares a floor with them, and that it is not mechanically possible to open these 'floor doors' when the elevator cabin is on another floor (not quite sure how to model someone taking a crowbar and forcing them open).  
 
-Safe conditions were chosen to ensure:  
+Safety conditions were chosen to ensure:  
 - The doors can only be open when the elevator is not running.
 - The elevator can only run when the doors are closed.  
 
 Liveliness conditions were chosen to check if:  
-- The request queue is eventually empty at some point, i.e. all floor requests have been served.  
-- One timeRemaining has started to increase, it will eventually be reset to zero, i.e. the oldest request in the queue will eventually be served.
+- The request queue is eventually empty at some point (i.e. all floor requests will eventualy be served).  
+- One timeRemaining has started to increase, it will eventually be reset to zero (i.e. the oldest request in the queue will be served in a relatively timely manner).
 
-
+W.r.t. the extra credit:   
+- This code does not have the capability to restric access to certain floors.  
+- This code does not have the capability to parametrically model the number of floors or elevators.
+- Most elevators have a maximum weight capacity, so there would be value in tracking the number of concurrent passengers in the elevator cabin if this was a safety condition that needed to be tracked by the model.
 
   
 
