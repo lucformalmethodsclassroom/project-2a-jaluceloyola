@@ -16,11 +16,24 @@ The variable 'timePassed' is used to track how long the oldest request has been 
 The actions 'moveUp' and 'moveDown' moves the elevator in the respective direction, but contains logic restricting the elevator from moving away from the oldest request in the queue (i.e. the request at the head of the sequence). This ensures
 all floor requests will be met in a timely manner. It also closes the door, and sets the elevator into operation (i.e. running = ON). Each movement of the elevator also cause the value of 'timePassed' to increase by one.  
 
-The actions 'Floor1Request', 'Floor2Request', etc... simply check to see if the current floor request is already in the queue, and if not adds the request to the end of the queue. This ensures older requests will have a high priorty for being served. 
+The actions 'Floor1Request', 'Floor2Request', etc... simply check to see if the current floor request is already in the queue, and if not adds the request to the end of the queue, ensuring older requests will have a higher priorty for being served. 
    
 The action 'checkQueue' checks to see if the current floor is in the queue, and if so it opens the doors, stops the elevator (running = OFF), and removes the current floor from 'requestQueue'. If the current floor is also the same as the request at the head of 'requestQueue', then timePassed is set to 0.  
 
 The opening of the 'outer' elevator doors on each floor are not explicitly modeled. It is implicently assumed that these outer doors can only open when the elevator cabin is on their respective floor, i.e. the door on each floor is functionally part of the 'door' of the elevator when the cabin shares a floor with them, and that it is not mechanically possible to open these 'floor doors' when the elevator cabin is on another floor (not quite sure how to model someone taking a crowbar and forcing them open).  
+
+Safe conditions were chosen to ensure:  
+- The doors can only be open when the elevator is not running.
+- The elevator can only run when the doors are closed.  
+
+Liveliness conditions were chosen to check if:  
+- The request queue is eventually empty at some point, i.e. all floor requests have been served.  
+- One timeRemaining has started to increase, it will eventually be reset to zero, i.e. the oldest request in the queue will eventually be served.
+
+
+
+  
+
 
 
 
