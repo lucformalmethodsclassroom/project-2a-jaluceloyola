@@ -18,7 +18,7 @@ The actions 'Floor1Request', 'Floor2Request', etc... simply check to see if the 
 The action 'checkQueue' checks to see if the current floor is in the queue, and if so, stops the elevator and opens the doors to allow passengers to enter/exit ,and removes the current floor from 'requestQueue'. If the current floor is also the same as the request at the head of 'requestQueue', then timePassed is set to 0.  
 
 The actions 'moveUp' and 'moveDown' moves the elevator in the respective direction, but contains logic restricting the elevator from moving away from the oldest request in the queue (i.e. the request at the head of the sequence). This ensures
-all floor requests will be met in a timely manner. It also closes the door, and sets the elevator into operation (i.e. running = ON). Each movement of the elevator also cause the value of 'timePassed' to increase by one.  
+all floor requests will be met in a timely manner. It also closes the door, and sets the elevator into operation. Each movement of the elevator also causes the value of 'timePassed' to increase by one.  
 
 The opening of the 'outer' elevator doors on each floor are not explicitly modeled. It is assumed that these outer doors can only open when the elevator cabin is on their respective floor, i.e. the outer door on each floor is functionally part of the 'door' of the elevator when the cabin shares a floor with them, and that it is not mechanically possible to open these 'floor doors' when the elevator cabin is on another floor (not quite sure how to model someone taking a crowbar and forcing them open).  
 
