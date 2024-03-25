@@ -28,7 +28,7 @@ Safety conditions were chosen to ensure:
 
 Liveliness conditions were chosen to check if:  
 - The request queue is eventually empty at some point (i.e. all floor requests will eventualy be served).  
-- One timeRemaining has started to increase, it will eventually be reset to zero (i.e. the oldest request in the queue will be served in a relatively timely manner).
+- Once timeRemaining has started to increase, it will eventually be reset to zero (i.e. the oldest request in the queue will be served in a relatively timely manner).
 
 W.r.t. the extra credit:   
 - This code does not have the capability to restric access to certain floors.  
