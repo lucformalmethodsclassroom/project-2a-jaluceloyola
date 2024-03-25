@@ -15,7 +15,7 @@ The variable 'timePassed' is used to track how long the oldest request has been 
 
 The actions 'Floor1Request', 'Floor2Request', etc... simply check to see if the current floor request is already in the queue, and if not adds the request to the end of the queue, ensuring older requests will have a higher priorty for being served. 
    
-The action 'checkQueue' checks to see if the current floor is in the queue, and if so stops the elevator and opens the doors to allow passengers to enter/exit ,and removes the current floor from 'requestQueue'. If the current floor is also the same as the request at the head of 'requestQueue', then timePassed is set to 0.  
+The action 'checkQueue' checks to see if the current floor is in the queue, and if so, stops the elevator and opens the doors to allow passengers to enter/exit ,and removes the current floor from 'requestQueue'. If the current floor is also the same as the request at the head of 'requestQueue', then timePassed is set to 0.  
 
 The actions 'moveUp' and 'moveDown' moves the elevator in the respective direction, but contains logic restricting the elevator from moving away from the oldest request in the queue (i.e. the request at the head of the sequence). This ensures
 all floor requests will be met in a timely manner. It also closes the door, and sets the elevator into operation (i.e. running = ON). Each movement of the elevator also cause the value of 'timePassed' to increase by one.  
