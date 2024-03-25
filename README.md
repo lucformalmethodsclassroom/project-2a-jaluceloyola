@@ -31,7 +31,7 @@ Liveliness conditions were chosen to check if:
 - Once timeRemaining has started to increase, it will eventually be reset to zero (i.e. the oldest request in the queue will be served in a relatively timely manner).
 
 W.r.t. the extra credit:   
-- This code does not have the capability to restrict access to certain floors.  
+- The set "RESTRICTED_FLOORS" in the .cfg file can be used to restrict one, some, or all floors from being added to the request queue.
 - This code does not have the capability to parametrically model the number of floors or elevators.
 - Most elevators have a maximum weight capacity, so there would be value in tracking the number of concurrent passengers in the elevator cabin if this was a safety condition that needed to be considered by the model.
 
