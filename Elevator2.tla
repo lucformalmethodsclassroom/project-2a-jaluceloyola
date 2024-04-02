@@ -1,4 +1,4 @@
--------------------------- MODULE Elevator  --------------------------
+-------------------------- MODULE Elevator2  --------------------------
 EXTENDS TLC, Integers, Sequences
 
 CONSTANTS 
@@ -82,10 +82,11 @@ checkQueue ==
         /\ requestQueue' = SelectSeq(requestQueue,Test)
         /\ running' = OFF
         /\ cabinDoor' = OPEN
-        /\ IF Head(requestQueue) = currentFloor 
-            THEN /\ timePassed' = 0
-                 /\ UNCHANGED <<currentFloor>>
-            ELSE /\ UNCHANGED <<currentFloor, timePassed>>
+        /\ UNCHANGED <<currentFloor, timePassed>>
+        \*/\ IF Head(requestQueue) = currentFloor 
+        \*   THEN /\ timePassed' = 0
+        \*         /\ UNCHANGED <<currentFloor>>
+        \*    ELSE /\ UNCHANGED <<currentFloor, timePassed>>
     ELSE UNCHANGED <<running, currentFloor, requestQueue, cabinDoor, timePassed>>
 
 \* moveUp will check to see if there is a request in the queue, and if the oldest request is above
@@ -116,13 +117,13 @@ Next ==
     \/ floor3Request
     \/ floor4Request
     \/ checkQueue
-    \/  /\ moveUp
-        /\ Tick 
-    \/  /\ moveDown
-        /\ Tick
+    \/ moveUp
+    \/ moveDown
+    \/ Tick
 
 \* Ensures Tick is called with weak fairness
 TickProgress == WF_timePassed(Tick)
+
 Spec == Init /\ [][Next]_vars /\ TickProgress
 
 TypeOK == running \in { OFF, ON } /\ cabinDoor \in { CLOSED, OPEN } /\ currentFloor \in {1,2,3,4} /\ timePassed \in Nat
@@ -130,9 +131,11 @@ TypeOK == running \in { OFF, ON } /\ cabinDoor \in { CLOSED, OPEN } /\ currentFl
 DoorSafety == cabinDoor = OPEN => running = OFF
 RunSafety == running = ON => cabinDoor = CLOSED
 
-\*EventualService == TRUE
-\*TimelyService == TRUE
+MaxTime == 10
+TimeInvariance == timePassed < MaxTime
+TimelyService == TRUE
 
 EventualService == []<>(requestQueue = <<>>) \* Eventually all floors get serviced
-TimelyService == timePassed = 1 ~> timePassed = 0 \* Eventually the oldest request in the queue gets serviced
+\*TimelyService == timePassed = 1 ~> timePassed = 0 \* Eventually the oldest request in the queue gets serviced
+
 ====
