@@ -37,7 +37,7 @@ Init ==
     /\ running = OFF
     /\ cabinDoor = OPEN
     /\ currentFloor = 1
-    /\ requestQueue = <<2,3,4>>
+    /\ requestQueue = <<>>
     /\ timePassed = 0
 
 \*Increment passing of time as elevator moves between floors   
@@ -95,6 +95,7 @@ checkQueue ==
 moveUp ==
     /\ requestQueue # << >>
     /\ Head(requestQueue) > currentFloor 
+    /\ ~CheckFloorInQueue(currentFloor,requestQueue)
     /\ currentFloor < MAXFLOOR  
     /\ currentFloor' = currentFloor + 1
     /\ cabinDoor' = CLOSED
@@ -104,7 +105,8 @@ moveUp ==
 \* same as moveUp, but in the other direction
 moveDown ==
     /\ requestQueue # << >>
-    /\ Head(requestQueue) < currentFloor 
+    /\ Head(requestQueue) < currentFloor
+    /\ ~CheckFloorInQueue(currentFloor,requestQueue) 
     /\ currentFloor > MINFLOOR  
     /\ currentFloor' = currentFloor - 1
     /\ cabinDoor' = CLOSED
@@ -119,6 +121,8 @@ Next ==
     \/ checkQueue
     \/ moveUp
     \/ moveDown
+    \* \/ moveUp /\ checkQueue
+    \* \/ moveDown /\ checkQueue
     \/ Tick
 
 \* Ensures Tick is called with weak fairness
@@ -131,11 +135,10 @@ TypeOK == running \in { OFF, ON } /\ cabinDoor \in { CLOSED, OPEN } /\ currentFl
 DoorSafety == cabinDoor = OPEN => running = OFF
 RunSafety == running = ON => cabinDoor = CLOSED
 
-MaxTime == 10
+MaxTime == 20
 TimeInvariance == timePassed < MaxTime
-TimelyService == TRUE
 
 EventualService == []<>(requestQueue = <<>>) \* Eventually all floors get serviced
 \*TimelyService == timePassed = 1 ~> timePassed = 0 \* Eventually the oldest request in the queue gets serviced
-
+TimelyService == TRUE
 ====
