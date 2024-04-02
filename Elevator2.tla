@@ -2,7 +2,7 @@
 EXTENDS TLC, Integers, Sequences
 
 CONSTANTS 
-    OFF, ON, CLOSED, OPEN, MINFLOOR, MAXFLOOR, RESTRICTED_FLOORS
+    OFF, ON, CLOSED, OPEN, MINFLOOR, MAXFLOOR, RESTRICTED_FLOORS, FLOORS
 
 VARIABLES 
     running,
@@ -71,6 +71,18 @@ floor4Request ==
     /\ requestQueue' = Append(requestQueue,4)
     /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
 
+FloorRequest(floornum) == 
+    /\ ~CheckFloorInQueue(floornum,requestQueue)
+    /\ {x \in RESTRICTED_FLOORS : x # floornum} = {}
+    /\ requestQueue' = Append(requestQueue,floornum)
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
+
+FloorRequestRandom(floornum) == 
+    /\ ~CheckFloorInQueue(floornum,requestQueue)
+    /\ {x \in RESTRICTED_FLOORS : x # floornum} = {}
+    /\ requestQueue' = Append(requestQueue,floornum)
+    /\ UNCHANGED <<running, currentFloor, cabinDoor, timePassed>>
+
 \* checkQueue checks if currentFloor exists in request Queue. If TRUE,
 \* then stop running, open the doors to let passengers out and remove 
 \* the current floor from the queue. Also, if current floor is the same 
@@ -114,17 +126,15 @@ moveDown ==
     /\ UNCHANGED << requestQueue, timePassed>>
 
 Next ==
-    \/ floor1Request
-    \/ floor2Request
-    \/ floor3Request
-    \/ floor4Request
+    \*\/ FloorRequest(RandomElement(FLOORS))
     \/ checkQueue
     \/ moveUp
     \/ moveDown
-    \* \/ moveUp /\ checkQueue
-    \* \/ moveDown /\ checkQueue
     \/ Tick
-
+    \/ \/ floor1Request
+       \/ floor2Request
+       \/ floor3Request
+       \/ floor4Request
 \* Ensures Tick is called with weak fairness
 TickProgress == WF_timePassed(Tick)
 
